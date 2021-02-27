@@ -4,8 +4,6 @@ type chain = E | S of int * string * int;; (*Type chain, qui représente la part
 
 type player = H of int | B of int;; (*Type player, qui représente un joueur. H pour un Homme et B pour un Bot.*)
 
-let flip (D(a,b)) = (D(b,a));; 
-
 let dominoToString (D(a, b)) = string_of_int a ^ "-" ^ string_of_int b;;
 
 let flip (D(a,b)) = (D(b,a));; (*Fonction flip qui retourne un domino.*)
