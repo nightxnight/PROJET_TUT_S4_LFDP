@@ -28,13 +28,25 @@ let append = function (*Fonction append qui ajoute un domino à la chaine*)
 
 let legal_adds (D(a,b)) = function (*Renvoie les chaînes de dominos résultant de toutes les poses légales*)
   | S(debut, str, fin) ->
-      if (a = debut && a = fin) then [append (flip (D(a,b)), S(debut, str, fin), '<'); append (D(a,b), S(debut, str, fin), '>')]
-      else if (b = debut && b = fin) then [append (D(a,b), S(debut, str, fin), '<'); append (flip (D(a,b)), S(debut, str, fin), '>')]
-      else if (a = debut && b = fin) then [append (flip (D(a,b)), S(debut, str, fin), '<'); append (flip (D(a,b)), S(debut, str, fin), '>')]
-      else if (b = debut && a = fin) then [append (D(a,b), S(debut, str, fin), '<'); append (D(a,b), S(debut, str, fin), '>')]
-      else if(a = debut) then [append (flip (D(a,b)), S(debut, str, fin), '<')]
-      else if(a = fin) then [append (D(a,b), S(debut, str, fin), '>')]
-      else if (b = debut) then [append (D(a,b), S(debut, str, fin), '<')]
-      else if (b = fin) then [append (flip (D(a,b)), S(debut, str, fin), '>')]
-      else []
+    if (a = debut && a = fin) then [append (flip (D(a,b)), S(debut, str, fin), '<'); append (D(a,b), S(debut, str, fin), '>')]
+    else if (b = debut && b = fin) then [append (D(a,b), S(debut, str, fin), '<'); append (flip (D(a,b)), S(debut, str, fin), '>')]
+    else if (a = debut && b = fin) then [append (flip (D(a,b)), S(debut, str, fin), '<'); append (flip (D(a,b)), S(debut, str, fin), '>')]
+    else if (b = debut && a = fin) then [append (D(a,b), S(debut, str, fin), '<'); append (D(a,b), S(debut, str, fin), '>')]
+    else if(a = debut) then [append (flip (D(a,b)), S(debut, str, fin), '<')]
+    else if(a = fin) then [append (D(a,b), S(debut, str, fin), '>')]
+    else if (b = debut) then [append (D(a,b), S(debut, str, fin), '<')]
+    else if (b = fin) then [append (flip (D(a,b)), S(debut, str, fin), '>')]
+    else []
   | E -> [S(a, string_of_domino (D(a,b)), b)];;
+
+let possible_dominoes l = function (*Renvoie la liste de chacun des dominos d'une main donnée qui est plaçable au bout d'une chaîne donnée.*)
+  | E -> l
+  | S(deb, str, fin) ->
+    let rec parcours = function
+      | [] -> []
+      | x::l -> 
+        if(length (legal_adds (x) (S(deb, str, fin))) > 0) then
+          list_append ([x]) (parcours l)
+        else
+          parcours l
+    in parcours l;;
