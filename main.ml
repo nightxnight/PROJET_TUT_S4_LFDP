@@ -15,8 +15,8 @@ let append = function (*Fonction append qui ajoute un domino à la chaine*)
   | (D(a,b), E, '>') -> (S(a, string_of_domino (D(a,b)), b))
   | _ -> raise (Invalid_argument "Erreur dans l'utilisation de la fonction");;
 
-let legal_adds = function
-  | (D(a,b), S(debut, str, fin)) ->
+let legal_adds (D(a,b)) = function (**)
+  | S(debut, str, fin) ->
     if (a = debut && a = fin) then [append (flip (D(a,b)), S(debut, str, fin), '<'); append (D(a,b), S(debut, str, fin), '>')]
     else if (b = debut && b = fin) then [append (D(a,b), S(debut, str, fin), '<'); append (flip (D(a,b)), S(debut, str, fin), '>')]
     else if (a = debut && b = fin) then [append (flip (D(a,b)), S(debut, str, fin), '<'); append (flip (D(a,b)), S(debut, str, fin), '>')]
@@ -26,4 +26,4 @@ let legal_adds = function
     else if (b = debut) then [append (D(a,b), S(debut, str, fin), '<')]
     else if (b = fin) then [append (flip (D(a,b)), S(debut, str, fin), '<')]
     else []
-  | (D(a,b), E) -> [S(a, string_of_domino (D(a,b)), b)];;
+  | E -> [S(a, string_of_domino (D(a,b)), b)];;
