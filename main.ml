@@ -17,7 +17,7 @@ let length l =
 let rec list_append l1 l2 =
   match l1 with
   | [] -> l2
-  | x::l1' -> x :: append l1' l2;;
+  | x::l1' -> x :: list_append l1' l2;;
 
 let append = function (*Fonction append qui ajoute un domino à la chaine*)
   | (D(a,b), S(debut, str, fin), '<') -> (S(a, string_of_domino (D(a,b)) ^ " " ^ str, fin))
