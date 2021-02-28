@@ -14,7 +14,7 @@ let length l =
     | _::l -> urs (count + 1 ) l
   in urs 0 l;;
 
-let rec append l1 l2 =
+let rec list_append l1 l2 =
   match l1 with
   | [] -> l2
   | x::l1' -> x :: append l1' l2;;
