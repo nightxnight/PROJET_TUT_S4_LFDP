@@ -8,13 +8,13 @@ let string_of_domino (D(a, b)) = string_of_int a ^ "-" ^ string_of_int b;; (*Per
 
 let flip (D(a,b)) = (D(b,a));; (*Fonction flip qui retourne un domino.*)
 
-let length l =
+let length l = (*Retourne la taille d'une liste*)
   let rec urs count = function
     | [] -> count
     | _::l -> urs (count + 1 ) l
   in urs 0 l;;
 
-let rec list_append l1 l2 =
+let rec list_append l1 l2 = (*Retourne la fusion de deux listes entre elles*)
   match l1 with
   | [] -> l2
   | x::l1' -> x :: list_append l1' l2;;
