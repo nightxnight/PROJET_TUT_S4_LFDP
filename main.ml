@@ -40,3 +40,28 @@ let possible_dominoes dominoes chain = (*Renvoie la liste de chacun des dominos 
     | x::l when (legal_adds x chain) != [] -> x::(urs l)
     | _::l -> urs l
   in urs dominoes;;
+
+
+let list = []
+let s = 0
+
+let char_list_of_string c = 
+  let rec urs s l =
+    if s < 0 
+    then l 
+    else urs (s - 1) (c.[s] :: l) in urs (String.length c - 1) [];;
+
+
+let list_of_players = []
+let i = 0
+
+let player_ofstring s = 
+  let rec urs i l =
+    if i < 0 
+    then l 
+    else
+      match s.[i] with 
+      |'H' -> urs (i - 1) (H (i+1) :: l) 
+      |'B' -> urs (i - 1) (B (i+1) :: l) 
+      | -> failwith "erreur"
+      in urs (String.length s - 1) [] ;;
