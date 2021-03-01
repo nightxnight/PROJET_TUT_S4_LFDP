@@ -65,3 +65,19 @@ let player_ofstring s =
       |'B' -> urs (i - 1) (B (i+1) :: l) 
       | -> failwith "erreur"
       in urs (String.length s - 1) [] ;;
+      
+let rec suppress d = function 
+    | [] -> []
+    | x::l when x = d || x = flip d -> l
+    | x::l -> x::suppress d l;;
+
+  
+  let string_of_chain = function (*Renvoie la chaine représentant la partie en cours*)
+    |E -> ""
+    |S (nb_g, str, nb_d) -> str
+
+  let string_of_state l = function (*Renvoie l'état d'un joueur*)
+    |H(x) when l = [] -> "Joueur "^x^" (humain) : \t"
+    |H(x)-> "Joueur "^x^" (humain) : \t"^string_of_dominoes(l)
+    |B(x) when l = [] -> "Joueur "^x^" (bot) : \t"
+    |B(x)-> "Joueur "^x^" (bot) : \t"^string_of_dominoes(l) 
