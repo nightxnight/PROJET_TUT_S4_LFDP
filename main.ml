@@ -14,39 +14,29 @@ let length l = (*Retourne la taille d'une liste*)
     | _::l -> urs (count + 1 ) l
   in urs 0 l;;
 
-let rec list_append l1 l2 = (*Retourne la fusion de deux listes entre elles*)
-  match l1 with
-  | [] -> l2
-  | x::l1' -> x :: list_append l1' l2;;
-
 let append = function (*Fonction append qui ajoute un domino à la chaine*)
   | (D(a,b), S(debut, str, fin), '<') -> (S(a, string_of_domino (D(a,b)) ^ " " ^ str, fin))
   | (D(a,b), S(debut, str, fin), '>') -> (S(debut, str ^ " " ^ string_of_domino (D(a,b)), b))
   | (D(a,b), E, '<') -> (S(a, string_of_domino (D(a,b)), b))
-  | (D(a,b), E, '>') -> (S(a, string_of_domino (D(a,b)), b))
   | _ -> raise (Invalid_argument "Erreur dans l'utilisation de la fonction");;
 
 let legal_adds (D(a,b)) = function (*Renvoie les chaînes de dominos résultant de toutes les poses légales*)
-  | S(debut, str, fin) ->
-    if (a = debut && a = fin) then [append (flip (D(a,b)), S(debut, str, fin), '<'); append (D(a,b), S(debut, str, fin), '>')]
-    else if (b = debut && b = fin) then [append (D(a,b), S(debut, str, fin), '<'); append (flip (D(a,b)), S(debut, str, fin), '>')]
-    else if (a = debut && b = fin) then [append (flip (D(a,b)), S(debut, str, fin), '<'); append (flip (D(a,b)), S(debut, str, fin), '>')]
-    else if (b = debut && a = fin) then [append (D(a,b), S(debut, str, fin), '<'); append (D(a,b), S(debut, str, fin), '>')]
-    else if(a = debut) then [append (flip (D(a,b)), S(debut, str, fin), '<')]
-    else if(a = fin) then [append (D(a,b), S(debut, str, fin), '>')]
-    else if (b = debut) then [append (D(a,b), S(debut, str, fin), '<')]
-    else if (b = fin) then [append (flip (D(a,b)), S(debut, str, fin), '>')]
-    else []
-  | E -> [S(a, string_of_domino (D(a,b)), b)];;
+  | E -> [S(a, string_of_domino (D(a,b)), b)]
+  | S(d, _, f) as chain when (a = d && a = f) -> [append (flip (D(a,b)), chain, '<'); append (D(a,b), chain, '>')]
+  | S(d, _, f) as chain when (b = d && b = f) -> [append (D(a,b), chain, '<'); append (flip (D(a,b)), chain, '>')]
+  | S(d, _, f) as chain when (a = d && b = f) -> [append (flip (D(a,b)), chain, '<'); append (flip (D(a,b)), chain, '>')]
+  | S(d, _, f) as chain when (b = d && a = f) -> [append (D(a,b), chain, '<'); append (D(a,b), chain, '>')]
+  | S(d, _, f) as chain when (a = d) -> [append (flip (D(a,b)), chain, '<')]
+  | S(d, _, f) as chain when (a = f) -> [append (D(a,b), chain, '>')]
+  | S(d, _, f) as chain when (b = d) -> [append (D(a,b), chain, '<')]
+  | S(d, _, f) as chain when (b = f) -> [append (flip (D(a,b)), chain, '>')]
+  | _ -> [];;
 
-let possible_dominoes l = function (*Renvoie la liste de chacun des dominos d'une main donnée qui est plaçable au bout d'une chaîne donnée.*)
-  | E -> l
-  | S(deb, str, fin) ->
-    let rec parcours = function
-      | [] -> []
-      | x::l -> 
-        if(length (legal_adds (x) (S(deb, str, fin))) > 0) then
-          list_append ([x]) (parcours l)
-        else
-          parcours l
-    in parcours l;;
+let possible_dominoes dominoes chain = (*Renvoie la liste de chacun des dominos d'une main donnée qui est plaçable au bout d'une chaîne donnée.*)
+  if chain = E then dominoes
+  else
+  let rec urs = function
+    | [] -> []
+    | x::l when (legal_adds x chain) != [] -> x::(urs l)
+    | _::l -> urs l
+  in urs dominoes;;
