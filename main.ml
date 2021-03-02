@@ -113,6 +113,11 @@ match (destination, n, source) with
 | (destination, n, (D(a, b))::ts) -> take ((D(a, b))::destination) (n-1) ts
 ;;
 
+(Version Waian) : 
+let rec string_of_dominoes = function
+  | [] -> ""
+  | D (a, b) :: l -> string_of_int a ^ "-" ^ string_of_int b ^ " " ^ string_of_dominoes l;;
+
 (*move*)
 
 
