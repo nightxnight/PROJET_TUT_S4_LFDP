@@ -42,6 +42,23 @@ let append = function
   | _ -> failwith "Direction invalide";;
 
 (* renvoie sous forme de liste les chain legales apres placement d'un domino *)
+let legal_adds (D(a, b)) = function
+  | E -> [append (D(a, b), E, ' ')] 
+  | chain ->
+    let place (D(a, b)) = function
+      | S(d, _, f) as chain when d=b && f=a -> [append (D(a, b), chain, '<'); append (D(a, b), chain, '>');] 
+      | S(_, _, f) as chain when a=f -> [append (D(a, b), chain, '>')] 
+      | S(d, _, _) as chain when b=d -> [append (D(a, b), chain, '<')] 
+      | _ -> []
+    in 
+    let is_double = function 
+    | D(x, y) when x = y -> place (D(x, y)) chain
+    | domino -> place domino chain @ place (flip domino) chain
+    in is_double (D(a, b));; 
+
+(*
+Anciennes versions de legal_adds 
+
 let legal_adds (D(a, b)) chain =
   match chain with
   | E -> [S(a, string_of_domino (D(a,b)), b)] 
@@ -53,9 +70,6 @@ let legal_adds (D(a, b)) chain =
       | S(_, _, f) as chain when a=f -> [append (D(a, b), chain, '>')] 
       | _ -> []
     in place (D(a, b)) chain @ place (flip (D(a, b))) chain;; 
-
-(*
-Anciennes versions de legal_adds 
 
 let legal_adds (D(a,b)) = function (*Renvoie les chaînes de dominos résultant de toutes les poses légales*)
   | E -> [S(a, string_of_domino (D(a,b)), b)]
@@ -291,7 +305,7 @@ let players_of_string str =
   in urs 1 (char_list_of_string str);;
 
 (* retourne la taille de la main initiale en fonction du nombre de joueur *)
-let hand_size = function 
+let get_hand_size = function 
   | 2 -> 7
   | 3 | 4 -> 6
   | _ -> failwith "Between 2 and 4 players, please!"
@@ -300,9 +314,9 @@ let hand_size = function
 let make_state_list players_str dominoes =
     let rec urs players dominoes to_take state_list = 
     match (players, take [] to_take dominoes) with
-    | ([], (taken, rest)) -> ((List.concat [taken;rest]), state_list)
+    | ([], (taken, rest)) -> ((List.concat [taken;rest]), List.rev state_list)
     | (p::l, (hand, stack)) -> urs l stack to_take ((hand, p)::state_list)
-    in urs (List.rev (players_of_string players_str)) dominoes (hand_size (String.length players_str)) [];;
+    in urs (players_of_string players_str) dominoes (get_hand_size (String.length players_str)) [];;
 
 (*
        _                                                                  _         _ _ _   
