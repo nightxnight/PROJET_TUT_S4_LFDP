@@ -94,9 +94,11 @@ let s = 0;;
                                                           | |                                                          | |    
                                                           |_|                                                          |_|    
 *)
-(* à modif*)
 
-(*string_of_player*)
+(* convertis un joueur en chaine *)
+let string_of_player = function
+  | H(x) -> Printf.sprintf ("Joueur %d (%s)") x "humain"
+  | B(x) -> Printf.sprintf ("Joueur %d (%s)") x "bot";;
 
 let rec take destination n source = 
 match (destination, n, source) with
