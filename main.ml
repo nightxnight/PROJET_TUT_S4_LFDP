@@ -101,7 +101,38 @@ let possible_dominoes dominoes chain =
                                                                            | |              _/ |                              
                                                                            |_|             |__/                               
 *)
+
+(* convertis une chaine en domino *)
+let domino_of_string str = 
+  let x = int_of_string (List.nth (String.split_on_char '-' str) 0)
+  and y= int_of_string (List.nth (String.split_on_char '-' str) 1) 
+  in D(x,y);;
+
+(* teste si une chaine donne est bien un domino *)
+let is_domino str = 
+  if (String.contains str '-') = false then false
+  else if (String.index str '-') != (String.rindex str '-') then false
+  else try
+      let result = function
+        | (x, y) when 0 < int_of_string x && 0 < int_of_string y -> true
+        | _ -> false  
+      in result ((String.trim (List.nth (String.split_on_char '-' str) 0)),(String.trim (List.nth (String.split_on_char '-' str) 1)))
+    with _ -> false;;
+    
+    
 (*input_valid*)
+(* permet d'effectuer des saisies clavier avec predicat et cast *)
+let read = ref read_line;;
+let rec input_valid prompt is_valid cast =
+  let rec urs () =
+    let s = !read () in
+    if is_valid s then cast s
+    else
+      let () = print_endline "Réessayez!" in
+      urs ()
+  in
+  print_endline prompt; urs ();;
+
 
 let rec suppress d = function 
     | [] -> []
@@ -109,8 +140,52 @@ let rec suppress d = function
     | x::l -> x::suppress d l;;
 
 (*input_move*)
+(* fonction qui permet de jouer un domino parmis une liste de dominos, dans une chaine donnee*)
+let input_move select_domino select_end chain dominoes = 
+  let selected_end domino chain = 
+    match (legal_adds domino chain) with
+    | [] -> None
+    | x::[] -> Some x
+    | x::y::_ -> Some (select_end x y) 
+  in
+  let selected_domino dominoes chain = 
+    match (possible_dominoes dominoes chain) with
+    | [] -> None
+    | x::[] -> print_string (Printf.sprintf ("Coup forcé:\t%s") (string_of_domino x)); Some x
+    | l -> Some (select_domino l)  
+  in 
+  let result domino chain = 
+    match (selected_end domino chain) with  
+    | None -> None
+    | Some chain -> Some ((suppress domino dominoes), chain)
+  in 
+  let exec dominoes chain = 
+    match (selected_domino dominoes chain) with
+    | None -> None
+    | Some domino -> result domino chain
+  in exec dominoes chain;;
 
 (*input_bot_move*)
+(* fonction a executer par les bots pour jouer *)
+let input_bot_move chain dominoes = input_move 
+                                        (function l -> List.nth l (Random.int (List.length l))) 
+                                        (fun c1 c2 -> List.hd (list_shuffle [c1;c2]))
+                                        chain
+                                        dominoes
+
+(* fonction a executer par les humains pour jouer*)
+let input_human_move chain dominoes = input_move
+                                        (function dominoes -> input_valid
+                                            ("Entrez le domino que vous voulez poser")
+                                            (function str -> if (is_domino str && List.mem (domino_of_string str) dominoes) then true else false)
+                                            domino_of_string)
+
+                                        (fun c1 c2 -> if (input_valid
+                                                                ("Entrez < pour poser à gauche ou > pour poser à droite")
+                                                                (function str -> if (str = "<" || str = ">") then true else false)
+                                                                (function x -> x)) = "<" then c1 else c2)
+                                        chain
+                                        dominoes                                   
 
 (*input_human_move*)
 
