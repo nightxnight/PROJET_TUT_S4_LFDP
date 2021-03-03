@@ -260,7 +260,13 @@ let hand_size = function
     | 3 | 4 -> 6
     | _ -> failwith "Between 2 and 4 players, please!"
 
-(*make_state_list*)
+(* cree un couple compose de la pioche et de couples d'un joueur et de ses dominos *)
+let make_state_list players_str dominoes =
+  let rec urs players dominoes to_take state_list = 
+    match (players, take [] to_take dominoes) with
+      | ([], (taken, rest)) -> ((List.concat [taken;rest]), state_list)
+      | (p::l, (hand, talon)) -> urs l talon to_take ((hand, p)::state_list)
+    in urs (players_of_string players_str) dominoes (hand_size (String.length players_str)) [];;
 
 (*
        _                                                                  _         _ _ _   
