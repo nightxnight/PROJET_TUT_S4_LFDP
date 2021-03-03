@@ -132,11 +132,11 @@ let make_dominoes n =
     | (x,y) -> (D(x,y))::urs (x, y-1)
     in urs (n, n);;
 
-let char_list_of_string c = 
-  let rec urs s l =
-    if s < 0 
-    then l 
-    else urs (s - 1) (c.[s] :: l) in urs (String.length c - 1) [];;
+(* convertis un tableau en liste de caractère *)
+let rec char_list_of_string str = 
+match (String.length str) with
+    | 0 -> []
+    | n -> str.[0]::char_list_of_string (String.sub str 1 (n - 1));;
 
 let list_of_players = [];;
 
