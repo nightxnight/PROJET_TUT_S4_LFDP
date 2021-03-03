@@ -183,6 +183,11 @@ let string_of_state l = function (*Renvoie l'état d'un joueur*)
   | B x  when l = [] -> "Joueur " ^ string_of_int x ^" (bot) : \t"
   | B x -> "Joueur " ^ string_of_int x ^ " (bot) : \t"^string_of_dominoes(l) ;;
 
+  (* Version test de string_of_state by Waian *)
+  let rec string_of_state = function
+  | ([], t) -> string_of_player t ^ " : any domino"
+  | (D (a, b) :: l, t) -> string_of_player t ^ " : " ^ string_of_int a ^ "-" ^ string_of_int b ^ " " ^ string_of_dominoes l
+
 (*list_shuffle*)
 
 (*play*)
