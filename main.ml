@@ -82,6 +82,17 @@ let legal_adds (D(a, b)) chain =
 *)
 
 (* renvoie la sous-liste des dominos placable d'une liste de dominos et d'une chain donnee *)
+
+let possible_dominoes dominoes = function
+  | E -> dominoes 
+  | S (_, _, _) as chain ->
+      let rec urs = function
+        | [] -> []
+        | x::l when (legal_adds x chain) != [] -> x::urs l 
+        | _::l -> urs l
+      in urs dominoes;;
+
+(* (Ancienne version ) 
 let possible_dominoes dominoes chain =
   if chain = E then dominoes
   else
@@ -90,7 +101,7 @@ let possible_dominoes dominoes chain =
     | x::l when (legal_adds x chain) != [] -> x::(urs l)
     | _::l -> urs l
   in urs dominoes;;
-
+*)
 (*
    _____   __ _           _   _                   _                                  __       _                               
   / ____| /_/| |         | | (_)                 | |                                 \_\     (_)                              
@@ -233,12 +244,20 @@ let rec string_of_dominoes = function
 
 (* cree toutes les combinaisons de dominos de chiffre maximum n *)
 let make_dominoes n = 
+  let rec urs = function
+    | (0, 0) -> (D(0, 0))::[]
+    | (x, 0) -> (D(x,0))::urs (x-1, x-1)
+    | (x, y) -> (D(x,y))::urs (x, y-1)
+  in urs (n, n);;
+
+(*  (Ancienne version )
+let make_dominoes n = 
     let rec urs = function
     | (-1, -1) -> []
     | (x,-1) -> urs (x-1, x-1)
     | (x,y) -> (D(x,y))::urs (x, y-1)
     in urs (n, n);;
-
+*)
 (* convertis un tableau en liste de caractère *)
 let rec char_list_of_string str = 
 match (String.length str) with
