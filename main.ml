@@ -113,10 +113,10 @@ let string_of_player = function
   | B(x) -> Printf.sprintf ("Joueur %d (%s)") x "bot";;
 
 let rec take destination n source = 
-  match (destination, n, source) with
-    | (destination, 0, source) -> (destination, source)
-    | (destination, n, []) -> (destination, [])
-    | (destination, n, (D(a, b))::ts) -> take ((D(a, b))::destination) (n-1) ts;;
+  match (n, source) with
+    | (0, source) -> (destination, source)
+    | (n, []) -> (destination, [])
+    | (n, (D(a, b))::ts) -> take ((D(a, b))::destination) (n-1) ts;;
 
 (* convertis une liste de domino en chaine *)
 let rec string_of_dominoes = function
