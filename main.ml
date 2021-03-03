@@ -153,11 +153,11 @@ let player_of_string s =
       | _ -> failwith "erreur"
       in urs (String.length s - 1) [] ;;
 
-let get_hand_size n =
-  match n with
+(* retourne la taille de la main initiale en fonction du nombre de joueur *)
+let hand_size = function 
     | 2 -> 7
-    | n when n = 3 || n = 4 -> 6
-    | _ -> failwith "Entre 2 et 4 joueurs, please!";;
+    | 3 | 4 -> 6
+    | _ -> failwith "Between 2 and 4 players, please!"
 
 (*make_state_list*)
 
