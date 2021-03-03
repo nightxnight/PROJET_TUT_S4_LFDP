@@ -1,9 +1,3 @@
-let length l = (*Retourne la taille d'une liste*)
-  let rec urs count = function
-    | [] -> count
-    | _::l -> urs (count + 1 ) l
-  in urs 0 l;;
-
 (*
   _______                                          _              _ _       
  |__   __|                                        | |            (_) |      
