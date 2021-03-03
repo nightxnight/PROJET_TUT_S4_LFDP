@@ -26,7 +26,8 @@ type player = H of int | B of int;; (*Type player, qui représente un joueur. H 
                                                                         |_|                 |___/                  
 *)
 
-let string_of_domino (D(a, b)) = string_of_int a ^ "-" ^ string_of_int b;; (*Permet de récupérer la chaine de caractère d'un domino.*)
+(* convertis un domino en chaine *)
+let string_of_domino (D(a, b)) = Printf.sprintf ("%d-%d") a b;;
 
 let flip (D(a,b)) = (D(b,a));; (*Fonction flip qui retourne un domino.*)
 
