@@ -44,14 +44,15 @@ let append = function
 (* renvoie sous forme de liste les chain legales apres placement d'un domino *)
 let legal_adds (D(a, b)) chain =
   match chain with
-    | E -> [S(a, string_of_domino (D(a,b)), b)]
-    | S(d, _, f) ->
+  | E -> [S(a, string_of_domino (D(a,b)), b)] 
+  | S(d, _, f) as chain when (d=a && f=a) || (d=b && f=b) -> [append (D(a, b), chain, '<'); append (D(a, b), chain, '>')] 
+  | S(d, _, f) -> 
       let place (D(a, b)) = function
         | S(d, _, f) as chain when b=d && a=f-> [append (D(a, b), chain, '<'); append (D(a, b), chain, '>')] 
         | S(d, _, _) as chain when b=d -> [append (D(a, b), chain, '<')] 
         | S(_, _, f) as chain when a=f -> [append (D(a, b), chain, '>')] 
         | _ -> []
-      in List.concat [place (D(a, b)) chain;place (flip (D(a, b))) chain];;
+      in List.concat [place (D(a, b)) chain;place (flip (D(a, b))) chain];; 
 
 (*
 Anciennes versions de legal_adds 
