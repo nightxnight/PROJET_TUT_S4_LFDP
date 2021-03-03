@@ -172,9 +172,10 @@ let hand_size = function
                      |_|             |_|                                                    
 *)
 
-let string_of_chain = function (*Renvoie la chaine représentant la partie en cours*)
-  | E -> ""
-  | S (nb_g, str, nb_d) -> str;;
+(* convertis une chain en chaine *)
+let string_of_chain = function
+    | E -> ""
+    | S(_, board, _) -> board
 
 let string_of_state l = function (*Renvoie l'état d'un joueur*)
   | H x when l = [] -> "Joueur " ^ string_of_int x ^" (humain) : \t"
