@@ -38,15 +38,27 @@ let append = function (*Fonction append qui ajoute un domino à la chaine*)
   | _ -> failwith "Erreur dans l'utilisation de la fonction";;
 
 let legal_adds (D(a, b)) chain =
-  if chain = E then [append ((D(a, b)), chain, ' ')]
-  else if a = b then [append ((D(a, b)), chain, '>'); append ((D(a, b)), chain, '>')]
-  else
-    let place (D(a, b)) = function
-      | S(d, _, f) as chain when b=d && a=f-> [append (D(a, b), chain, '<'); append (D(a, b), chain, '>')] 
-      | S(d, _, _) as chain when b=d -> [append (D(a, b), chain, '<')] 
-      | S(_, _, f) as chain when a=f -> [append (D(a, b), chain, '>')] 
-      | _ -> []
-    in List.concat [place (D(a, b)) chain;place (flip (D(a, b))) chain];;
+  match chain with
+    | E -> [S(a, string_of_domino (D(a,b)), b)]
+    | S(d, _, f) ->
+      let place (D(a, b)) = function
+        | S(d, _, f) as chain when b=d && a=f-> [append (D(a, b), chain, '<'); append (D(a, b), chain, '>')] 
+        | S(d, _, _) as chain when b=d -> [append (D(a, b), chain, '<')] 
+        | S(_, _, f) as chain when a=f -> [append (D(a, b), chain, '>')] 
+        | _ -> []
+      in List.concat [place (D(a, b)) chain;place (flip (D(a, b))) chain];;
+
+let legal_adds (D(a,b)) = function (*Renvoie les chaînes de dominos résultant de toutes les poses légales*)
+  | E -> [S(a, string_of_domino (D(a,b)), b)]
+  | S(d, _, f) as chain when (a = d && b = f) -> [append (flip (D(a,b)), chain, '<'); append (flip (D(a,b)), chain, '>')]
+  | S(d, _, f) as chain when (a = d && a = f) -> [append (flip (D(a,b)), chain, '<'); append (D(a,b), chain, '>')]
+  | S(d, _, f) as chain when (b = d && b = f) -> [append (D(a,b), chain, '<'); append (flip (D(a,b)), chain, '>')]
+  | S(d, _, f) as chain when (b = d && a = f) -> [append (D(a,b), chain, '<'); append (D(a,b), chain, '>')]
+  | S(d, _, _) as chain when (a = d) -> [append (flip (D(a,b)), chain, '<')]
+  | S(_, _, f) as chain when (b = f) -> [append (flip (D(a,b)), chain, '>')]
+  | S(_, _, f) as chain when (a = f) -> [append (D(a,b), chain, '>')]
+  | S(d, _, _) as chain when (b = d) -> [append (D(a,b), chain, '<')]
+  | _ -> [];;
 
 let possible_dominoes dominoes chain = (*Renvoie la liste de chacun des dominos d'une main donnée qui est plaçable au bout d'une chaîne donnée.*)
   if chain = E then dominoes
@@ -101,10 +113,10 @@ let string_of_player = function
   | B(x) -> Printf.sprintf ("Joueur %d (%s)") x "bot";;
 
 let rec take destination n source = 
-match (destination, n, source) with
-| (destination, 0, source) -> (destination, source)
-| (destination, n, []) -> (destination, [])
-| (destination, n, (D(a, b))::ts) -> take ((D(a, b))::destination) (n-1) ts;;
+  match (destination, n, source) with
+    | (destination, 0, source) -> (destination, source)
+    | (destination, n, []) -> (destination, [])
+    | (destination, n, (D(a, b))::ts) -> take ((D(a, b))::destination) (n-1) ts;;
 
 (* convertis une liste de domino en chaine *)
 let rec string_of_dominoes = function
