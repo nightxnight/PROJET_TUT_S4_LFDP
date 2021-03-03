@@ -45,7 +45,7 @@ let append = function
 let legal_adds (D(a, b)) chain =
   match chain with
   | E -> [S(a, string_of_domino (D(a,b)), b)] 
-  | S(d, _, f) as chain when (d=a && f=a) || (d=b && f=b) -> [append (D(a, b), chain, '<'); append (D(a, b), chain, '>')] 
+  | S(d, _, f) as chain when (a=d && a=f) || (b=d && b=f) -> [append (D(a, b), chain, '<'); append (D(a, b), chain, '>')] 
   | S(d, _, f) -> 
       let place (D(a, b)) = function
         | S(d, _, f) as chain when b=d && a=f-> [append (D(a, b), chain, '<'); append (D(a, b), chain, '>')] 
