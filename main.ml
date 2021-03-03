@@ -106,10 +106,11 @@ match (destination, n, source) with
 | (destination, n, []) -> (destination, [])
 | (destination, n, (D(a, b))::ts) -> take ((D(a, b))::destination) (n-1) ts;;
 
-(*Version Waian*) 
+(* convertis une liste de domino en chaine *)
 let rec string_of_dominoes = function
-  | [] -> ""
-  | D (a, b) :: l -> string_of_int a ^ "-" ^ string_of_int b ^ " " ^ string_of_dominoes l;;
+  | [] -> "" 
+  | x::[] -> string_of_domino x
+  | x::l -> Printf.sprintf ("%s %s") (string_of_domino x) (string_of_dominoes l);;
 
 (*move*)
 
