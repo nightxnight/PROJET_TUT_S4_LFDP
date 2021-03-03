@@ -175,6 +175,13 @@ let input_move select_domino select_end chain dominoes =
     | Some domino -> result domino chain
   in exec dominoes chain;;
 
+(* melange une liste, fonction polymorphique *)
+let list_shuffle l = 
+    let rec urs = function
+    | [] -> []
+    | (n, x)::l -> x::urs l
+    in urs (List.sort (fun x y -> compare (fst x) (fst y)) (List.map (function x -> (Random.bits (), x)) l));;
+
 (* fonction a executer par les bots pour jouer *)
 let input_bot_move chain dominoes = input_move 
                                         (function l -> let choosen_domino d = print_string (Printf.sprintf("\tà placer :\t%s\n") (string_of_domino d)) ; d in choosen_domino (List.nth l (Random.int (List.length l))))
@@ -313,12 +320,5 @@ let string_of_chain = function
 
 (* convertis un couple (dominos, joueur) en chaine *)
 let string_of_state (dominoes, player) = Printf.sprintf ("%s:\n\t%s") (string_of_player player) (string_of_dominoes dominoes);;
-
-(* melange une liste, fonction polymorphique *)
-let list_shuffle l = 
-    let rec urs = function
-    | [] -> []
-    | (n, x)::l -> x::urs l
-    in urs (List.sort (fun x y -> compare (fst x) (fst y)) (List.map (function x -> (Random.bits (), x)) l));;
 
 (*play*)
