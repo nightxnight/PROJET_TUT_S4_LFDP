@@ -11,9 +11,11 @@
 
 type domino = D of int * int;; (*Type domino, qui représente un domino.*)
 
-type chain = E | S of int * string * int;; (*Type chain, qui représente la partie en cours. E si la partie démarre et S sinon*)
+type chain = E | S of int * string * int;; (*Type chain, represente la partie en cours. Vaut E si la partie commence sinon S triplet d'une string representant le jeu et de deux entiers aux extemités : nombre placable.*)
 
 type player = H of int | B of int;; (*Type player, qui représente un joueur. H pour un Homme et B pour un Bot.*)
+
+type 'a option = None | Some of 'a;; (*Type option polymorphe afin d'accepter la valeur None.*)
 
 (*
    _____           _   _                   _                                         _   __                        
@@ -29,14 +31,17 @@ type player = H of int | B of int;; (*Type player, qui représente un joueur. H 
 (* convertis un domino en chaine *)
 let string_of_domino (D(a, b)) = Printf.sprintf ("%d-%d") a b;;
 
-let flip (D(a,b)) = (D(b,a));; (*Fonction flip qui retourne un domino.*)
+(* retourne un domino *)
+let flip (D(a,b)) = (D(b,a));;
 
-let append = function (*Fonction append qui ajoute un domino à la chaine*)
+(* ajoute un domino a une extremite de la chain *)
+let append = function
   | (D(a,b), S(debut, str, fin), '<') -> (S(a, string_of_domino (D(a,b)) ^ " " ^ str, fin))
   | (D(a,b), S(debut, str, fin), '>') -> (S(debut, str ^ " " ^ string_of_domino (D(a,b)), b))
-  | (D(a,b), E, '<') -> (S(a, string_of_domino (D(a,b)), b))
+  | (D(a,b), E, _) -> (S(a, string_of_domino (D(a,b)), b))
   | _ -> failwith "Erreur dans l'utilisation de la fonction";;
 
+(* renvoie sous forme de liste les chain legales apres placement d'un domino *)
 let legal_adds (D(a, b)) chain =
   match chain with
     | E -> [S(a, string_of_domino (D(a,b)), b)]
@@ -47,6 +52,9 @@ let legal_adds (D(a, b)) chain =
         | S(_, _, f) as chain when a=f -> [append (D(a, b), chain, '>')] 
         | _ -> []
       in List.concat [place (D(a, b)) chain;place (flip (D(a, b))) chain];;
+
+(*
+Anciennes versions de legal_adds 
 
 let legal_adds (D(a,b)) = function (*Renvoie les chaînes de dominos résultant de toutes les poses légales*)
   | E -> [S(a, string_of_domino (D(a,b)), b)]
@@ -60,7 +68,21 @@ let legal_adds (D(a,b)) = function (*Renvoie les chaînes de dominos résultant 
   | S(d, _, _) as chain when (b = d) -> [append (D(a,b), chain, '<')]
   | _ -> [];;
 
-let possible_dominoes dominoes chain = (*Renvoie la liste de chacun des dominos d'une main donnée qui est plaçable au bout d'une chaîne donnée.*)
+let legal_adds (D(a, b)) chain =
+  if chain = E then [append ((D(a, b)), chain, ' ')]
+  else if a = b then [append ((D(a, b)), chain, '>'); append ((D(a, b)), chain, '>')]
+  else
+    let place (D(a, b)) = function
+      | S(d, _, f) as chain when b=d && a=f-> [append (D(a, b), chain, '<'); append (D(a, b), chain, '>')] 
+      | S(d, _, _) as chain when b=d -> [append (D(a, b), chain, '<')] 
+      | S(_, _, f) as chain when a=f -> [append (D(a, b), chain, '>')] 
+      | _ -> []
+    in List.concat [place (D(a, b)) chain;place (flip (D(a, b))) chain];;
+
+*)
+
+(* renvoie la sous-liste des dominos placable d'une liste de dominos et d'une chain donnee *)
+let possible_dominoes dominoes chain =
   if chain = E then dominoes
   else
   let rec urs = function
@@ -86,10 +108,6 @@ let rec suppress d = function
     | x::l when x = d || x = flip d -> l
     | x::l -> x::suppress d l;;
 
-let list = [];;
-
-let s = 0;;
-
 (*input_move*)
 
 (*input_bot_move*)
@@ -110,8 +128,9 @@ let s = 0;;
 (* convertis un joueur en chaine *)
 let string_of_player = function
   | H(x) -> Printf.sprintf ("Joueur %d (%s)") x "humain"
-  | B(x) -> Printf.sprintf ("Joueur %d (%s)") x "bot";;
+  | B(x) -> Printf.sprintf ("Joueur %d (%s)   ") x "bot";;
 
+(* transfert un nombre n de dominos de la source a la destination *)
 let rec take destination n source = 
   match (n, source) with
     | (0, source) -> (destination, source)
@@ -137,6 +156,7 @@ let rec string_of_dominoes = function
                                   |_|                                                 |_|                          
 *)
 
+(* cree toutes les combinaisons de dominos de chiffre maximum n *)
 let make_dominoes n = 
     let rec urs = function
     | (-1, -1) -> []
@@ -150,20 +170,14 @@ match (String.length str) with
     | 0 -> []
     | n -> str.[0]::char_list_of_string (String.sub str 1 (n - 1));;
 
-let list_of_players = [];;
-
-let i = 0;;
-
-let player_of_string s = 
-  let rec urs i l =
-    if i < 0 
-    then l 
-    else
-      match s.[i] with 
-      |'H' -> urs (i - 1) (H (i+1) :: l) 
-      |'B' -> urs (i - 1) (B (i+1) :: l) 
-      | _ -> failwith "erreur"
-      in urs (String.length s - 1) [] ;;
+(* convertis une chaine en liste de joueur *)
+let players_of_string str = 
+    let rec urs n = function 
+    | [] -> []
+    | 'B'::l | 'b'::l -> (B(n))::urs (n + 1) l
+    | 'H'::l | 'h'::l -> (H(n))::urs (n + 1) l
+    | _::l -> failwith "Erreur dans l'utilisation de la fonction"
+    in urs 1 (char_list_of_string str);;
 
 (* retourne la taille de la main initiale en fonction du nombre de joueur *)
 let hand_size = function 
@@ -189,16 +203,8 @@ let string_of_chain = function
     | E -> ""
     | S(_, board, _) -> board
 
-let string_of_state l = function (*Renvoie l'état d'un joueur*)
-  | H x when l = [] -> "Joueur " ^ string_of_int x ^" (humain) : \t"
-  | H x -> "Joueur " ^ string_of_int x ^" (humain) : \t"^string_of_dominoes(l)
-  | B x  when l = [] -> "Joueur " ^ string_of_int x ^" (bot) : \t"
-  | B x -> "Joueur " ^ string_of_int x ^ " (bot) : \t"^string_of_dominoes(l) ;;
-
-  (* Version test de string_of_state by Waian *)
-  let rec string_of_state = function
-  | ([], t) -> string_of_player t ^ " : any domino"
-  | (D (a, b) :: l, t) -> string_of_player t ^ " : " ^ string_of_int a ^ "-" ^ string_of_int b ^ " " ^ string_of_dominoes l
+(* convertis un couple (dominos, joueur) en chaine *)
+let string_of_state (dominoes, player) = Printf.sprintf ("%s:\n\t%s") (string_of_player player) (string_of_dominoes dominoes);;
 
 (*list_shuffle*)
 
