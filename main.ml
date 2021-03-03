@@ -306,6 +306,11 @@ let string_of_chain = function
 (* convertis un couple (dominos, joueur) en chaine *)
 let string_of_state (dominoes, player) = Printf.sprintf ("%s:\n\t%s") (string_of_player player) (string_of_dominoes dominoes);;
 
-(*list_shuffle*)
+(* melange une liste, fonction polymorphique *)
+let list_shuffle l = 
+    let rec urs = function
+    | [] -> []
+    | (n, x)::l -> x::urs l
+    in urs (List.sort (fun x y -> compare (fst x) (fst y)) (List.map (function x -> (Random.bits (), x)) l));;
 
 (*play*)
