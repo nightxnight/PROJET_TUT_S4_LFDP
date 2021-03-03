@@ -103,6 +103,7 @@ let possible_dominoes dominoes chain =
     | _::l -> urs l
   in urs dominoes;;
 *)
+
 (*
    _____   __ _           _   _                   _                                  __       _                               
   / ____| /_/| |         | | (_)                 | |                                 \_\     (_)                              
@@ -131,8 +132,6 @@ let is_domino str =
       in result ((String.trim (List.nth (String.split_on_char '-' str) 0)),(String.trim (List.nth (String.split_on_char '-' str) 1)))
     with _ -> false;;
     
-    
-(*input_valid*)
 (* permet d'effectuer des saisies clavier avec predicat et cast *)
 let read = ref read_line;;
 let rec input_valid prompt is_valid cast =
@@ -145,13 +144,12 @@ let rec input_valid prompt is_valid cast =
   in
   print_endline prompt; urs ();;
 
-
+(* supprime un domino d'une liste de dominos *)
 let rec suppress d = function 
     | [] -> []
     | x::l when x = d || x = flip d -> l
     | x::l -> x::suppress d l;;
 
-(*input_move*)
 (* fonction qui permet de jouer un domino parmis une liste de dominos, dans une chaine donnee*)
 let input_move select_domino select_end chain dominoes = 
   let selected_end domino chain = 
@@ -162,8 +160,8 @@ let input_move select_domino select_end chain dominoes =
   in
   let selected_domino dominoes chain = 
     match (possible_dominoes dominoes chain) with
-    | [] -> None
-    | x::[] -> print_string (Printf.sprintf ("Coup forcé:\t%s") (string_of_domino x)); Some x
+    | [] -> print_string "Aucun coup possible!"; None
+    | x::[] -> print_string (Printf.sprintf ("Coup forcé:\t%s\n") (string_of_domino x)); Some x
     | l -> Some (select_domino l)  
   in 
   let result domino chain = 
@@ -177,10 +175,9 @@ let input_move select_domino select_end chain dominoes =
     | Some domino -> result domino chain
   in exec dominoes chain;;
 
-(*input_bot_move*)
 (* fonction a executer par les bots pour jouer *)
 let input_bot_move chain dominoes = input_move 
-                                        (function l -> List.nth l (Random.int (List.length l))) 
+                                        (function l -> let choosen_domino d = print_string (Printf.sprintf("\tà placer :\t%s\n") (string_of_domino d)) ; d in choosen_domino (List.nth l (Random.int (List.length l))))
                                         (fun c1 c2 -> List.hd (list_shuffle [c1;c2]))
                                         chain
                                         dominoes
@@ -188,18 +185,16 @@ let input_bot_move chain dominoes = input_move
 (* fonction a executer par les humains pour jouer*)
 let input_human_move chain dominoes = input_move
                                         (function dominoes -> input_valid
-                                            ("Entrez le domino que vous voulez poser")
+                                            ("Quel domino voulez-vous poser ?")
                                             (function str -> if (is_domino str && List.mem (domino_of_string str) dominoes) then true else false)
                                             domino_of_string)
 
                                         (fun c1 c2 -> if (input_valid
-                                                                ("Entrez < pour poser à gauche ou > pour poser à droite")
+                                                                ("A quel bout ?")
                                                                 (function str -> if (str = "<" || str = ">") then true else false)
                                                                 (function x -> x)) = "<" then c1 else c2)
                                         chain
-                                        dominoes                                   
-
-(*input_human_move*)
+                                        dominoes                                         
 
 (*
    _____           _   _                                         _  __  _             _ _                                     
@@ -230,8 +225,19 @@ let rec string_of_dominoes = function
   | x::[] -> string_of_domino x
   | x::l -> Printf.sprintf ("%s %s") (string_of_domino x) (string_of_dominoes l);;
 
-(*move*)
-
+(* fonction qui fait jouer un joueur si il le peut, il piochera sinon *)
+let move talon chain hand player = 
+    print_string (Printf.sprintf ("%s\n") (string_of_player player));
+    print_string (Printf.sprintf ("\tmain : %s\n") (string_of_dominoes hand));
+    let result chain dominoes f =
+        match (f chain dominoes) with
+        | None -> let pioche (new_hand, new_talon) = (new_talon, chain, new_hand) in pioche (take hand 2 talon)
+        | Some(new_hand, new_chain) -> (talon, new_chain, new_hand)
+    and
+        input_x_move = function
+    | B(_) -> input_bot_move
+    | H(_) -> input_human_move
+    in result chain hand (input_x_move player);;
 (*
   __  __ _                               _                      _ _                                     _   _      
  |  \/  (_)                             | |                    | ( )                                   | | (_)     
@@ -259,6 +265,7 @@ let make_dominoes n =
     | (x,y) -> (D(x,y))::urs (x, y-1)
     in urs (n, n);;
 *)
+
 (* convertis un tableau en liste de caractère *)
 let rec char_list_of_string str = 
 match (String.length str) with
