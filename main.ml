@@ -29,16 +29,16 @@ type 'a option = None | Some of 'a;; (*Type option polymorphe afin d'accepter la
 *)
 
 (* convertis un domino en chaine *)
-let string_of_domino (D(a, b)) = Printf.sprintf ("%d-%d") a b;;
+let string_of_domino (D(a, b)) = Printf.sprintf "%d-%d" a b;;
 
 (* retourne un domino *)
 let flip (D(a,b)) = (D(b,a));;
 
 (* ajoute un domino a une extremite de la chain *)
 let append = function
-  | (D(a,b), E, _) -> S (a, string_of_domino (D(a, b)), b)
-  | (D(a, b), S(_, board, fin), '<') -> S (a, Printf.sprintf ("%s %s") (string_of_domino (D(a, b))) board, fin)
-  | (D(a, b), S(debut, board, _), '>') -> S (debut, Printf.sprintf ("%s %s") board (string_of_domino (D(a, b))), b)
+  | D(a,b), E, _ -> S (a, string_of_domino (D(a, b)), b)
+  | D(a, b), S(_, board, fin), '<' -> S(a, Printf.sprintf "%s %s" (string_of_domino (D(a, b))) board, fin)
+  | D(a, b), S(debut, board, _), '>' -> S (debut, Printf.sprintf "%s %s" board (string_of_domino (D(a, b))), b)
   | _ -> failwith "Direction invalide";;
 
 (* renvoie sous forme de liste les chain legales apres placement d'un domino *)
@@ -52,7 +52,7 @@ let legal_adds (D(a, b)) chain =
       | S(d, _, _) as chain when b=d -> [append (D(a, b), chain, '<')] 
       | S(_, _, f) as chain when a=f -> [append (D(a, b), chain, '>')] 
       | _ -> []
-    in (place (D(a, b)) chain) @ (place (flip (D(a, b))) chain);; 
+    in place (D(a, b)) chain @ place (flip (D(a, b))) chain;; 
 
 (*
 Anciennes versions de legal_adds 
@@ -89,7 +89,7 @@ let possible_dominoes dominoes = function
   | chain ->
     let rec urs = function
       | [] -> []
-      | x::l when (legal_adds x chain) != [] -> x::urs l 
+      | x::l when legal_adds x chain != [] -> x::urs l 
       | _::l -> urs l
     in urs dominoes;;
 
@@ -123,11 +123,11 @@ let domino_of_string str =
 
 (* teste si une chaine donne est bien un domino *)
 let is_domino str = 
-  if (String.contains str '-') = false then false
-  else if (String.index str '-') != (String.rindex str '-') then false
+  if String.contains str '-' = false then false
+  else if String.index str '-' != String.rindex str '-' then false
   else try
       let result = function
-        | (x, y) when 0 < int_of_string x && 0 < int_of_string y -> true
+        | x, y when 0 < int_of_string x && 0 < int_of_string y -> true
         | _ -> false  
       in result ((String.trim (List.nth (String.split_on_char '-' str) 0)),(String.trim (List.nth (String.split_on_char '-' str) 1)))
     with _ -> false;;
@@ -153,24 +153,24 @@ let rec suppress d = function
 (* fonction qui permet de jouer un domino parmis une liste de dominos, dans une chaine donnee*)
 let input_move select_domino select_end chain dominoes = 
   let selected_end domino chain = 
-    match (legal_adds domino chain) with
+    match legal_adds domino chain with
     | [] -> None
     | x::[] -> Some x
     | x::y::_ -> Some (select_end x y) 
   in
   let selected_domino dominoes chain = 
-    match (possible_dominoes dominoes chain) with
+    match possible_dominoes dominoes chain with
     | [] -> print_string "Aucun coup possible!"; None
     | x::[] -> print_string (Printf.sprintf ("Coup forcé:\t%s\n") (string_of_domino x)); Some x
     | l -> Some (select_domino l)  
   in 
   let result domino chain = 
-    match (selected_end domino chain) with  
+    match selected_end domino chain with  
     | None -> None
     | Some chain -> Some ((suppress domino dominoes), chain)
   in 
   let exec dominoes chain = 
-    match (selected_domino dominoes chain) with
+    match selected_domino dominoes chain with
     | None -> None
     | Some domino -> result domino chain
   in exec dominoes chain;;
@@ -216,34 +216,34 @@ let input_human_move chain dominoes = input_move
 
 (* convertis un joueur en chaine *)
 let string_of_player = function
-  | H(x) -> Printf.sprintf ("Joueur %d (%s)") x "humain"
-  | B(x) -> Printf.sprintf ("Joueur %d (%s)   ") x "bot";;
+  | H x -> Printf.sprintf "Joueur %d (%s)" x "humain"
+  | B x -> Printf.sprintf "Joueur %d (%s)   " x "bot";;
 
 (* transfert un nombre n de dominos de la source a la destination *)
 let rec take destination n source = 
-  match (n, source) with
-  | (0, source) -> (destination, source)
-  | (n, []) -> (destination, [])
-  | (n, (D(a, b))::ts) -> take ((D(a, b))::destination) (n-1) ts;;
+  match n, source with
+  | 0, source -> (destination, source)
+  | n, [] -> (destination, [])
+  | n, (D(a, b))::ts -> take ((D(a, b))::destination) (n-1) ts;;
 
 (* convertis une liste de domino en chaine *)
 let rec string_of_dominoes = function
   | [] -> "" 
   | x::[] -> string_of_domino x
-  | x::l -> Printf.sprintf ("%s %s") (string_of_domino x) (string_of_dominoes l);;
+  | x::l -> Printf.sprintf "%s %s" (string_of_domino x) (string_of_dominoes l);;
 
 (* fonction qui fait jouer un joueur si il le peut, il piochera sinon *)
 let move talon chain hand player = 
   print_string (Printf.sprintf ("%s\n") (string_of_player player));
   print_string (Printf.sprintf ("\tmain : %s\n") (string_of_dominoes hand));
   let result chain dominoes f =
-    match (f chain dominoes) with
+    match f chain dominoes with
     | None -> let pioche (new_hand, new_talon) = (new_talon, chain, new_hand) in pioche (take hand 2 talon)
     | Some(new_hand, new_chain) -> (talon, new_chain, new_hand)
   and
     input_x_move = function
-    | B(_) -> input_bot_move
-    | H(_) -> input_human_move
+    | B _ -> input_bot_move
+    | H _ -> input_human_move
   in result chain hand (input_x_move player);;
 (*
   __  __ _                               _                      _ _                                     _   _      
@@ -259,10 +259,10 @@ let move talon chain hand player =
 (* cree toutes les combinaisons de dominos de chiffre maximum n *)
 let make_dominoes n = 
   let rec urs = function
-    | (0, 0) -> [D(0,0)]
-    | (x, 0) -> (D(x,0))::urs (x-1, x-1)
-    | (x, y) -> (D(x,y))::urs (x, y-1)
-  in urs (n, n);;
+    | 0, 0 -> [D(0,0)]
+    | x, 0 -> (D(x,0))::urs (x-1, x-1)
+    | x, y -> (D(x,y))::urs (x, y-1)
+  in urs n, n;;
 
 (*  (Ancienne version )
     let make_dominoes n = 
@@ -275,7 +275,7 @@ let make_dominoes n =
 
 (* convertis un tableau en liste de caractère *)
 let rec char_list_of_string str = 
-  match (String.length str) with
+  match String.length str with
   | 0 -> []
   | n -> str.[0]::char_list_of_string (String.sub str 1 (n - 1));;
 
@@ -297,9 +297,9 @@ let hand_size = function
 (* cree un couple compose de la pioche et de couples d'un joueur et de ses dominos *)
 let make_state_list players_str dominoes =
   let rec urs players dominoes to_take state_list = 
-    match (players, take [] to_take dominoes) with
-    | ([], (taken, rest)) -> (taken @ rest, state_list)
-    | (p::l, (hand, talon)) -> urs l talon to_take ((hand, p)::state_list)
+    match players, take [] to_take dominoes with
+    | [], (taken, rest) -> (taken @ rest, state_list)
+    | p::l, (hand, talon) -> urs l talon to_take ((hand, p)::state_list)
   in urs (players_of_string players_str) dominoes (hand_size (String.length players_str)) [];;
 
 (*
@@ -316,7 +316,7 @@ let make_state_list players_str dominoes =
 (* convertis une chain en chaine *)
 let string_of_chain = function
   | E -> ""
-  | S(_, board, _) -> board
+  | S(_,board,_)->board
 
 (* convertis un couple (dominos, joueur) en chaine *)
 let string_of_state (dominoes, player) = Printf.sprintf ("%s:\n\t%s") (string_of_player player) (string_of_dominoes dominoes);;
