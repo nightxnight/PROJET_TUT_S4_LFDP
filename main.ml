@@ -45,15 +45,15 @@ let append = function
 let legal_adds domino = function
   |E-> [(append(domino,E,'>'))]
   |S(d, _,f) as chain ->
-    let place = function 
-      | D(a,b) when (d = b && f = a) && a != b -> [append(domino, chain, '<'); append(domino, chain, '>')]
-      | D(a,b) when (d = a && f = b) && a != b -> [append(flip domino, chain, '<') ; append(flip domino, chain, '>')]
-      | D(a,b) when d = a -> [append(flip domino, chain,'<')]
-      | D(a,b) when d = b -> [append(domino, chain, '<')]
-      | D(a,b) when f = a -> [append(domino, chain, '>')]
-      | D(a,b) when f = b -> [append(flip domino, chain,'>')]
-      |_->[]
-    in place domino
+      let place = function 
+        | D(a,b) when (d = b && f = a) && a != b -> [append(domino, chain, '<'); append(domino, chain, '>')]
+        | D(a,b) when (d = a && f = b) && a != b -> [append(flip domino, chain, '<') ; append(flip domino, chain, '>')]
+        | D(a,b) when d = a -> [append(flip domino, chain,'<')]
+        | D(a,b) when d = b -> [append(domino, chain, '<')]
+        | D(a,b) when f = a -> [append(domino, chain, '>')]
+        | D(a,b) when f = b -> [append(flip domino, chain,'>')]
+        |_->[]
+      in place domino
 
 
 (*
@@ -113,11 +113,11 @@ let legal_adds (D(a, b)) chain =
 let possible_dominoes dominoes = function
   | E -> dominoes 
   | chain ->
-    let rec urs = function
-      | [] -> []
-      | x::l when legal_adds x chain != [] -> x::urs l 
-      | _::l -> urs l
-    in urs dominoes;;
+      let rec urs = function
+        | [] -> []
+        | x::l when legal_adds x chain != [] -> x::urs l 
+        | _::l -> urs l
+      in urs dominoes;;
 
 (*
 Ancienne version:
@@ -155,7 +155,7 @@ let is_domino str =
   else if String.index str '-' != String.rindex str '-' then false
   else try
       let result = function
-        | x, y when 0 < int_of_string x && 0 < int_of_string y -> true
+        | x, y when 0 <= int_of_string x && 0 <= int_of_string y -> true
         | _ -> false  
       in result ((String.trim (List.nth (String.split_on_char '-' str) 0)),(String.trim (List.nth (String.split_on_char '-' str) 1)))
     with _ -> false;;
@@ -188,7 +188,7 @@ let input_move select_domino select_end chain dominoes =
   in
   let selected_domino dominoes chain = 
     match (possible_dominoes dominoes chain) with
-    | [] -> print_string "Aucun coup possible!\n"; None
+    | [] -> print_string "\tAucun coup possible!\n"; None
     | x::[] -> print_string (Printf.sprintf ("\tCoup forcé:\t%s\n") (string_of_domino x)); Some x
     | l -> Some (select_domino l)  
   in 
@@ -221,12 +221,12 @@ let input_bot_move chain dominoes = input_move
 let input_human_move chain dominoes = input_move
     (function dominoes -> input_valid
                             ("Quel domino voulez-vous poser ?")
-                            (function str -> if (is_domino str && List.mem (domino_of_string str) dominoes) then true else false)
+                            (function str -> is_domino str && List.mem (domino_of_string str) dominoes)
                             domino_of_string)
 
     (fun c1 c2 -> if (input_valid
                         ("A quel bout ?")
-                        (function str -> if (str = "<" || str = ">") then true else false)
+                        (function str -> str = "<" || str = ">")
                         (function x -> x)) = "<" then c1 else c2)
     chain
     dominoes                                      
@@ -262,7 +262,7 @@ let rec string_of_dominoes = function
 
 (* fonction qui fait jouer un joueur si il le peut, il piochera sinon *)
 let move stack chain hand player = 
-  print_string (Printf.sprintf ("%s\n") (string_of_player player));
+  print_string (Printf.sprintf ("%s:\n") (string_of_player player));
   print_string (Printf.sprintf ("\tmain : %s\n") (string_of_dominoes hand));
   let result chain dominoes f =
     match (f chain dominoes) with
@@ -330,7 +330,7 @@ let get_hand_size = function
 let make_state_list players_str dominoes =
   let rec urs players dominoes to_take state_list = 
     match (players, take [] to_take dominoes) with
-    | ([], (taken, rest)) -> ((List.concat [taken;rest]), List.rev state_list)
+    | ([], (taken, rest)) -> (List.rev (rest @ taken), List.rev state_list)
     | (p::l, (hand, stack)) -> urs l stack to_take ((hand, p)::state_list)
   in urs (players_of_string players_str) dominoes (get_hand_size (String.length players_str)) [];;
 
@@ -360,17 +360,20 @@ let play domino_max player_str =
   let player_play player_and_hand stack chain = 
     match (move stack chain (fst player_and_hand) (snd player_and_hand)) with 
     | (_, new_chain, new_hand) as result-> 
-      print_string (Printf.sprintf "\tchaîne :    \t%s\n" (string_of_chain new_chain));
-      let end_game hand = 
-        match new_hand with
-        | [] -> None 
-        | _ -> Some result
-      in end_game new_hand
+        print_string (Printf.sprintf "\tchaîne :    \t%s\n" (string_of_chain new_chain));
+        let check_game_state hand = 
+          match new_hand with
+          | [] -> None 
+          | _ when chain = new_chain -> Some (1, result)
+          | _ -> Some (0, result)
+        in check_game_state new_hand
   in
-  let rec loop players_list stack chain = 
-    match player_play (List.hd players_list) stack chain with
-    | None -> print_string (Printf.sprintf "%s a gagné!\n" (string_of_player (snd (List.hd players_list)))) ; ()
-    | Some (new_stack, new_chain, hand) -> loop ((List.tl players_list) @ [(hand, snd (List.hd players_list))]) new_stack new_chain
+  let rec loop players_list stack chain = function
+    | x when x = (List.length players_list) -> print_string "Match nul!\n"; ()
+    | stop ->
+        match player_play (List.hd players_list) stack chain with
+        | None -> print_string (Printf.sprintf "%s a gagné!\n" (string_of_player (snd (List.hd players_list)))) ; ()
+        | Some (pass, (new_stack, new_chain, hand)) -> loop ((List.tl players_list) @ [(hand, snd (List.hd players_list))]) new_stack new_chain ((stop + pass) * pass) 
   in 
   List.iter (function x -> print_string (Printf.sprintf "%s\n" (string_of_state x))) (snd state_list);
-  loop (snd state_list) (fst state_list) E;;
+  loop (snd state_list) (fst state_list) E 0;; 
