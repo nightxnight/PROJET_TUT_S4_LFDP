@@ -42,6 +42,23 @@ let append = function
   | _ -> failwith "Direction invalide";;
 
 (* renvoie sous forme de liste les chain legales apres placement d'un domino *)
+let legal_adds domino = function
+  |E-> [(append(domino,E,'>'))]
+  |S(d, _,f) as chain ->
+      let place = function 
+      | D(a,b) when (d = b && f = a) && a != b -> [append(domino, chain, '<'); append(domino, chain, '>')]
+      | D(a,b) when (d = a && f = b) && a != b -> [append(flip domino, chain, '<') ; append(flip domino, chain, '>')]
+      | D(a,b) when d = a -> [append(flip domino, chain,'<')]
+      | D(a,b) when d = b -> [append(domino, chain, '<')]
+      | D(a,b) when f = a -> [append(domino, chain, '>')]
+      | D(a,b) when f = b -> [append(flip domino, chain,'>')]
+      |_->[]
+      in place domino
+ 
+
+(*
+Anciennes versions de legal_adds 
+
 let legal_adds (D(a, b)) = function
   | E -> [append (D(a, b), E, ' ')] 
   | chain ->
@@ -54,10 +71,7 @@ let legal_adds (D(a, b)) = function
     let is_double = function 
     | D(x, y) when x = y -> place (D(x, y)) chain
     | domino -> place domino chain @ place (flip domino) chain
-    in is_double (D(a, b));; 
-
-(*
-Anciennes versions de legal_adds 
+    in is_double (D(a, b));;
 
 let legal_adds (D(a, b)) chain =
   match chain with
