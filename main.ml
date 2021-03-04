@@ -45,7 +45,7 @@ let append = function
 let legal_adds domino = function
   |E-> [(append(domino,E,'>'))]
   |S(d, _,f) as chain ->
-      let place = function 
+    let place = function 
       | D(a,b) when (d = b && f = a) && a != b -> [append(domino, chain, '<'); append(domino, chain, '>')]
       | D(a,b) when (d = a && f = b) && a != b -> [append(flip domino, chain, '<') ; append(flip domino, chain, '>')]
       | D(a,b) when d = a -> [append(flip domino, chain,'<')]
@@ -53,11 +53,11 @@ let legal_adds domino = function
       | D(a,b) when f = a -> [append(domino, chain, '>')]
       | D(a,b) when f = b -> [append(flip domino, chain,'>')]
       |_->[]
-      in place domino
- 
+    in place domino
+
 
 (*
-Anciennes versions de legal_adds 
+Anciennes versions de legal_adds:
 
 let legal_adds (D(a, b)) = function
   | E -> [append (D(a, b), E, ' ')] 
@@ -69,8 +69,8 @@ let legal_adds (D(a, b)) = function
       | _ -> []
     in 
     let is_double = function 
-    | D(x, y) when x = y -> place (D(x, y)) chain
-    | domino -> place domino chain @ place (flip domino) chain
+      | D(x, y) when x = y -> place (D(x, y)) chain
+      | domino -> place domino chain @ place (flip domino) chain
     in is_double (D(a, b));;
 
 let legal_adds (D(a, b)) chain =
@@ -107,11 +107,9 @@ let legal_adds (D(a, b)) chain =
       | S(_, _, f) as chain when a=f -> [append (D(a, b), chain, '>')] 
       | _ -> []
     in (place (D(a, b)) chain) @ (place (flip (D(a, b))) chain);;
-
 *)
 
 (* renvoie la sous-liste des dominos placable d'une liste de dominos et d'une chain donnee *)
-
 let possible_dominoes dominoes = function
   | E -> dominoes 
   | chain ->
@@ -121,15 +119,17 @@ let possible_dominoes dominoes = function
       | _::l -> urs l
     in urs dominoes;;
 
-(* (Ancienne version ) 
-   let possible_dominoes dominoes chain =
-   if chain = E then dominoes
-   else
-   let rec urs = function
-    | [] -> []
-    | x::l when (legal_adds x chain) != [] -> x::(urs l)
-    | _::l -> urs l
-   in urs dominoes;;
+(*
+Ancienne version:
+
+let possible_dominoes dominoes chain =
+  if chain = E then dominoes
+  else
+    let rec urs = function
+      | [] -> []
+      | x::l when (legal_adds x chain) != [] -> x::(urs l)
+      | _::l -> urs l
+    in urs dominoes;;
 *)
 
 (*
@@ -212,24 +212,24 @@ let list_shuffle l =
 
 (* fonction a executer par les bots pour jouer *)
 let input_bot_move chain dominoes = input_move 
-                                        (function l -> let choosen_domino d = print_string (Printf.sprintf("\tà placer :  \t%s\n") (string_of_domino d)) ; d in choosen_domino (List.nth l (Random.int (List.length l))))
-                                        (fun c1 c2 -> List.hd (list_shuffle [c1;c2]))
-                                        chain
-                                        dominoes
+    (function l -> let choosen_domino d = print_string (Printf.sprintf("\tà placer :  \t%s\n") (string_of_domino d)) ; d in choosen_domino (List.nth l (Random.int (List.length l))))
+    (fun c1 c2 -> List.hd (list_shuffle [c1;c2]))
+    chain
+    dominoes
 
 (* fonction a executer par les humains pour jouer*)
 let input_human_move chain dominoes = input_move
-                                        (function dominoes -> input_valid
-                                            ("Quel domino voulez-vous poser ?")
-                                            (function str -> if (is_domino str && List.mem (domino_of_string str) dominoes) then true else false)
-                                            domino_of_string)
+    (function dominoes -> input_valid
+                            ("Quel domino voulez-vous poser ?")
+                            (function str -> if (is_domino str && List.mem (domino_of_string str) dominoes) then true else false)
+                            domino_of_string)
 
-                                        (fun c1 c2 -> if (input_valid
-                                                                ("A quel bout ?")
-                                                                (function str -> if (str = "<" || str = ">") then true else false)
-                                                                (function x -> x)) = "<" then c1 else c2)
-                                        chain
-                                        dominoes                                      
+    (fun c1 c2 -> if (input_valid
+                        ("A quel bout ?")
+                        (function str -> if (str = "<" || str = ">") then true else false)
+                        (function x -> x)) = "<" then c1 else c2)
+    chain
+    dominoes                                      
 
 (*
    _____           _   _                                         _  __  _             _ _                                     
@@ -262,17 +262,17 @@ let rec string_of_dominoes = function
 
 (* fonction qui fait jouer un joueur si il le peut, il piochera sinon *)
 let move stack chain hand player = 
-    print_string (Printf.sprintf ("%s\n") (string_of_player player));
-    print_string (Printf.sprintf ("\tmain : %s\n") (string_of_dominoes hand));
-    let result chain dominoes f =
-        match (f chain dominoes) with
-        | None -> let draw (new_hand, new_stack) = (new_stack, chain, new_hand) in draw (take hand 2 stack)
-        | Some(new_hand, new_chain) -> (stack, new_chain, new_hand)
-    and
-        input_x_move = function
+  print_string (Printf.sprintf ("%s\n") (string_of_player player));
+  print_string (Printf.sprintf ("\tmain : %s\n") (string_of_dominoes hand));
+  let result chain dominoes f =
+    match (f chain dominoes) with
+    | None -> let draw (new_hand, new_stack) = (new_stack, chain, new_hand) in draw (take hand 2 stack)
+    | Some(new_hand, new_chain) -> (stack, new_chain, new_hand)
+  and
+    input_x_move = function
     | B(_) -> input_bot_move
     | H(_) -> input_human_move
-    in result chain hand (input_x_move player);;
+  in result chain hand (input_x_move player);;
 
 
 (*
@@ -294,13 +294,15 @@ let make_dominoes n =
     | x, y -> (D(x,y))::urs (x, y-1)
   in urs (n, n);;
 
-(*  (Ancienne version )
-    let make_dominoes n = 
-    let rec urs = function
+(*
+Ancienne version:
+
+let make_dominoes n = 
+  let rec urs = function
     | (-1, -1) -> []
     | (x,-1) -> urs (x-1, x-1)
     | (x,y) -> (D(x,y))::urs (x, y-1)
-    in urs (n, n);;
+  in urs (n, n);;
 *)
 
 (* convertis un tableau en liste de caractère *)
@@ -326,11 +328,11 @@ let get_hand_size = function
 
 (* cree un couple compose de la pioche et de couples d'un joueur et de ses dominos *)
 let make_state_list players_str dominoes =
-    let rec urs players dominoes to_take state_list = 
+  let rec urs players dominoes to_take state_list = 
     match (players, take [] to_take dominoes) with
     | ([], (taken, rest)) -> ((List.concat [taken;rest]), List.rev state_list)
     | (p::l, (hand, stack)) -> urs l stack to_take ((hand, p)::state_list)
-    in urs (players_of_string players_str) dominoes (get_hand_size (String.length players_str)) [];;
+  in urs (players_of_string players_str) dominoes (get_hand_size (String.length players_str)) [];;
 
 (*
        _                                                                  _         _ _ _   
@@ -353,9 +355,9 @@ let string_of_state (dominoes, player) = Printf.sprintf ("%s:\t%s") (string_of_p
 
 (* permet de lancer une partie de dominos en fonction du nombre max des dominos ainsi que les joueurs sous forme de chaine *)
 let play domino_max player_str = 
-    let state_list = make_state_list player_str (list_shuffle (make_dominoes domino_max)) 
-    in
-    let player_play player_and_hand stack chain = 
+  let state_list = make_state_list player_str (list_shuffle (make_dominoes domino_max)) 
+  in
+  let player_play player_and_hand stack chain = 
     match (move stack chain (fst player_and_hand) (snd player_and_hand)) with 
     | (_, new_chain, new_hand) as result-> 
       print_string (Printf.sprintf "\tchaîne :    \t%s\n" (string_of_chain new_chain));
@@ -363,12 +365,12 @@ let play domino_max player_str =
         match new_hand with
         | [] -> None 
         | _ -> Some result
-        in end_game new_hand
-    in
-    let rec loop players_list stack chain = 
+      in end_game new_hand
+  in
+  let rec loop players_list stack chain = 
     match player_play (List.hd players_list) stack chain with
-      | None -> print_string (Printf.sprintf "%s a gagné!\n" (string_of_player (snd (List.hd players_list)))) ; ()
-      | Some (new_stack, new_chain, hand) -> loop ((List.tl players_list) @ [(hand, snd (List.hd players_list))]) new_stack new_chain
-    in 
-    List.iter (function x -> print_string (Printf.sprintf "%s\n" (string_of_state x))) (snd state_list);
-    loop (snd state_list) (fst state_list) E;;
+    | None -> print_string (Printf.sprintf "%s a gagné!\n" (string_of_player (snd (List.hd players_list)))) ; ()
+    | Some (new_stack, new_chain, hand) -> loop ((List.tl players_list) @ [(hand, snd (List.hd players_list))]) new_stack new_chain
+  in 
+  List.iter (function x -> print_string (Printf.sprintf "%s\n" (string_of_state x))) (snd state_list);
+  loop (snd state_list) (fst state_list) E;;
