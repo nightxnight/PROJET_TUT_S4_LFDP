@@ -213,7 +213,7 @@ let list_shuffle l =
 (* fonction a executer par les bots pour jouer *)
 let input_bot_move chain dominoes = input_move 
     (function l -> let choosen_domino d = print_string (Printf.sprintf("\tà placer :  \t%s\n") (string_of_domino d)) ; d in choosen_domino (List.nth l (Random.int (List.length l))))
-    (fun c1 c2 -> List.hd (list_shuffle [c1;c2]))
+    (fun c1 c2 -> List.nth [c1;c2] (Random.int (List.length [c1;c2])))
     chain
     dominoes
 
