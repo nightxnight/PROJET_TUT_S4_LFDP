@@ -40,7 +40,7 @@ Nous avons choisi **Discord** pour communiquer entre nous. Les **réunions quoti
 Dans plusieurs projets auparavant, nous avons appris à utiliser GitHub. On a donc choisi cette méthode pour partager et mettre en commun ce projet. Cela nous permet de récupérer rapidement les changements qu'a pu effectuer un membre du groupe. De plus, le système de tableau Kanban intégré à GitHub nous a permis de répartir les tâches et de suivre l'évolution du projet.
 
 ## c. Compilateur OCaml
-Afin de compiler et de tester les différentes fonctions du projet, nous avons utilisé **Jupyter** et **TryOCaml**.
+Afin de compiler et de tester les différentes fonctions du projet, nous avons utilisé **Jupyter**, **TryOCaml** et **WSL**.
 
 # V. Evolution du projet
 Il est important pour nous de conserver une bonne ambiance au sein de notre équipe de projet. En effet, tout le monde a fait l'effort de venir à chaque réunion que l'on s'était imposée en plus de la réunion de présentation avec le professeur.
